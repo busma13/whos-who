@@ -276,7 +276,7 @@ const Game = (props) => {
                 )
               )}
             </ArtistContainer>
-            {!showFinalScore && <div>Current Score: {score}</div>}
+            {!showFinalScore && <span>Current Score: {score}</span>}
 
             {isCorrect === true && <span>Correct!</span>}
             {isIncorrect === true && <span>Incorrect!</span>}
