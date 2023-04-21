@@ -276,7 +276,7 @@ const Home = () => {
                 value={selectedGenre}
                 onChange={(event) => setSelectedGenre(event.target.value)}
               >
-                <option value=''>Select Genre</option>
+                <option value="">Select Genre</option>
                 {genres.map((genre) => (
                   <option key={genre} value={genre}>
                     {genre}
@@ -287,15 +287,17 @@ const Home = () => {
             <GameConfigItem>
               # of Songs in Game
               <Input
-                type='number'
-                min='1'
-                max='3'
-                inputMode='numeric'
+                type="number"
+                min="1"
+                max="3"
+                inputMode="numeric"
                 value={numSongs}
                 onChange={(event) => {
                   const inputVal = event.target.value
                   // Use regular expression to remove any non-numeric characters
-                  const numericVal = event.target.value.replace(/[^1-3]/g, "")
+                  const numericVal = event.target.value
+                    .replace(/[^1-3]?/, "")
+                    .substr(0, 1)
                   setNumSongs(numericVal)
                 }}
               />
@@ -303,15 +305,17 @@ const Home = () => {
             <GameConfigItem>
               # of Artists in Choice
               <Input
-                type='number'
-                min='2'
-                max='4'
-                inputMode='numeric'
+                type="number"
+                min="2"
+                max="4"
+                inputMode="numeric"
                 value={numArtists}
                 onChange={(event) => {
                   const inputVal = event.target.value
                   // Use regular expression to remove any non-numeric characters
-                  const numericVal = event.target.value.replace(/[^2-4]/g, "")
+                  const numericVal = event.target.value
+                    .replace(/[^2-4]/g, "")
+                    .substr(0, 1)
                   setNumArtists(numericVal)
                 }}
               />
@@ -320,7 +324,7 @@ const Home = () => {
               {/* <Link to="/Game"> */}
               <Button
                 width={"80%"}
-                value='Start'
+                value="Start"
                 onClick={() => {
                   console.log("Button clicked")
                   console.log("Genre: " + selectedGenre)
