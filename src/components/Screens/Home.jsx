@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react"
-import fetchFromSpotify, { request } from "../../services/api"
+import fetchFromSpotify, { request } from "../../../src/services/api"
 import styled from "styled-components"
 import { Link, useHistory } from "react-router-dom"
 

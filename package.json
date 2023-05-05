@@ -1,13 +1,14 @@
 {
   "name": "whos-who",
   "version": "2.0.0",
-  "description": "Skeleton for the Spotify Assessment of the FastTrack'D Class",
+  "description": "A guessing game of artists and their music.",
   "main": "dist/index.js",
   "scripts": {
     "start": "webpack-dev-server --open --mode development",
     "build": "webpack --mode production"
   },
   "author": "Will Marttala",
+  "contributors": ["Peter Luitjens", "Shilpa Nair"],
   "license": "ISC",
   "devDependencies": {
     "@babel/core": "^7.17.9",

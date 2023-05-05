@@ -6,6 +6,10 @@ import { Howl, Howler } from "howler"
 import Background from "../Background.jsx"
 import Content from "../Content.jsx"
 import Button from "../Button.jsx"
+import blueStop from "../../images/stop-blue.png"
+import pinkStop from "../../images/stop-pink.png"
+import bluePlay from "../../images/play-blue.png"
+import pinkPlay from "../../images/play-pink.png"
 
 const StyledGame = styled.div`
   color: #fff;
@@ -34,9 +38,9 @@ const StyledGame = styled.div`
 `
 
 const blink = keyframes`
-    0% { background: url("play-blue.png") center no-repeat }
-    50% { background: url("play-pink.png") center no-repeat }
-    100% { background: url("play-blue.png") center no-repeat }
+    0% { background: url(${bluePlay}) center no-repeat }
+    50% { background: url(${pinkPlay}) center no-repeat }
+    100% { background: url(${bluePlay}) center no-repeat }
 `
 
 const PlayButton = styled.div`
@@ -254,7 +258,7 @@ const Game = (props) => {
                     : animationKey
                 }
                 playState={showNextAction ? "paused" : "running"}
-                bg={isPlaying ? "stop-blue.png" : "play-blue.png"}
+                bg={isPlaying ? blueStop : bluePlay}
                 onClick={() => playOrPauseSong()}
               ></PlayButton>
             </Song>
