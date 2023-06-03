@@ -2,7 +2,8 @@ const HtmlWebpackPlugin = require("html-webpack-plugin")
 const path = require("path")
 
 module.exports = {
-  entry: ["regenerator-runtime/runtime.js", "./src/index.js"],
+  entry: ["regenerator-runtime/runtime.js", "./src/index.tsx"],
+  devtool: "inline-source-map",
   output: {
     path: path.resolve(__dirname, "dist"),
     filename: "bundle.js",
@@ -27,6 +28,11 @@ module.exports = {
         test: /\.(png|svg|jpg|gif)$/,
         loader: "file-loader",
       },
+      {
+        test: /\.tsx?$/,
+        use: "ts-loader",
+        exclude: /node_modules/,
+      },
     ],
   },
   devServer: {
@@ -40,6 +46,6 @@ module.exports = {
   ],
   mode: "production",
   resolve: {
-    extensions: [".js", ".jsx"],
+    extensions: [".js", ".jsx", ".tsx", ".ts"],
   },
 }
