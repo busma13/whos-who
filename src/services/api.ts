@@ -1,4 +1,4 @@
-import { SpotifyGenresResponse, SpotifyOptions, SpotifyFetchParamsObject } from '../types/api'
+import { SpotifyGenresResponse, SpotifyOptions, SpotifyFetchParamsObject, SpotifyTracksResponse, SpotifyArtistsResponse, SpotifyAccessTokenResponse } from '../types/api'
 import toPairs from 'lodash/toPairs'
 import 'whatwg-fetch'
 
@@ -11,7 +11,7 @@ const SPOTIFY_ROOT = 'https://api.spotify.com/v1'
  *
  * @return {Prominse<SpotifyGenresResponse>} The parsed JSON from the request
  */
-const parseJSON = (response: Response): Promise<SpotifyGenresResponse> => {
+const parseJSON = (response: Response): Promise<any> => {
   if (response.status === 204 || response.status === 205) {
     return null
   }
@@ -40,9 +40,9 @@ const checkStatus = (response: Response): Response | undefined => {
  * @param  {string} url       The URL we want to request
  * @param  {SpotifyOptions} [options] The options we want to pass to "fetch"
  *
- * @return {Prominse<SpotifyGenresResponse>}           The response data
+ * @return {Promise<any>}           The response data
  */
-export const request = async (url: string, options: SpotifyOptions): Promise<SpotifyGenresResponse> => {
+export const request = async (url: string, options?: SpotifyOptions): Promise<SpotifyGenresResponse | SpotifyTracksResponse | SpotifyArtistsResponse | SpotifyAccessTokenResponse> => {
   // eslint-disable-next-line no-undef
   const response = await fetch(url, options)
   const response_1 = checkStatus(response)

@@ -2,12 +2,11 @@
   "name": "whos-who",
   "version": "2.0.0",
   "description": "A guessing game of artists and their music.",
-  "main": "dist/index.js",
+  "main": "dist/index.tsx",
   "scripts": {
     "lint": "eslint --ext .jsx,.js,.ts,.tsx src/ --fix",
     "start": "webpack-dev-server --open --mode development",
-    "build": "webpack --mode production",
-    "tsc-test": "tsc type-test.ts"
+    "build": "webpack --mode production"
   },
   "author": "Will Marttala",
   "contributors": [
@@ -20,7 +19,10 @@
     "@babel/preset-env": "^7.16.11",
     "@babel/preset-react": "^7.16.7",
     "@types/lodash": "^4.14.195",
+    "@types/react": "^18.2.8",
+    "@types/react-dom": "^18.2.4",
     "@types/react-router-dom": "^5.3.3",
+    "@types/styled-components": "^5.1.26",
     "@types/whatwg-fetch": "^0.0.33",
     "@typescript-eslint/eslint-plugin": "^5.59.8",
     "@typescript-eslint/parser": "^5.59.8",

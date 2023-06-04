@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react"
-import fetchFromSpotify, { request } from "../../../src/services/api"
+import fetchFromSpotify, { request } from "../../services/api"
 import styled from "styled-components"
-import { Link, useHistory } from "react-router-dom"
+import { useHistory } from "react-router-dom"
 
 import Button from "../Button"
 import Background from "../Background"
 import Content from "../Content"
+import { SpotifyToken } from "../../types/Home"
 
 const AUTH_ENDPOINT =
   "https://nuod0t2zoe.execute-api.us-east-2.amazonaws.com/FT-Classroom/spotify-auth-token"
@@ -44,11 +45,11 @@ const GameConfig = styled.div`
   }
 `
 
-const GameConfigItem = styled.div`
+const GameConfigItem = styled.div<{jc?:string}>`
   width: 100%;
   display: flex;
   flex-direction: row;
-  justify-content: ${({ jc }) => jc};
+  justify-content: ${({ jc = "space-between" }) => jc};
   padding: 10px 10px 10px 10px;
   @media only screen and (max-width: 520px) {
     flex-direction: column;
@@ -61,9 +62,9 @@ const GameConfigItem = styled.div`
   }
 `
 
-GameConfigItem.defaultProps = {
-  jc: "space-between",
-}
+// GameConfigItem.defaultProps = {
+//   jc: "space-between",
+// }
 
 const Select = styled.select`
   border-radius: 7px;
@@ -114,7 +115,7 @@ const Home = () => {
     localStorage.setItem("NUM_ARTISTS", JSON.stringify(numArtists))
   }, [selectedGenre, numArtists, numSongs])
 
-  const loadGenres = async (t) => {
+  const loadGenres = async (t: SpotifyToken) => {
     setConfigLoading(true)
     const response = await fetchFromSpotify({
       token: t,
@@ -145,25 +146,27 @@ const Home = () => {
     }
   }
 
-  const fetchTracksByGenre = async (t, numSongs) => {
+  const fetchTracksByGenre = async (t:SpotifyToken, numSongs: number) => {
     //Fetching 50 to allow some randomization of tracks
     const endpoint = `search?q=genre:"${selectedGenre}"&type=track&limit=50`
     const response = await fetchFromSpotify({
       token: t,
       endpoint: endpoint,
     })
+    console.log(response)
     const tracks = response.tracks.items
     const randomizedTracks = tracks.sort(() => 0.5 - Math.random())
     return randomizedTracks.slice(0, numSongs)
   }
 
-  const fetchRandomArtistsByGenre = async (t, numArtists) => {
+  const fetchRandomArtistsByGenre = async (t: SpotifyToken, numArtists: number) => {
     //Fetching 50 to allow some randomization of tracks
     const endpoint = `search?q=${selectedGenre}&type=artist&limit=50`
     const response = await fetchFromSpotify({
       token: t,
       endpoint: endpoint,
     })
+    console.log(response)
     const artists = response.artists.items
     console.log(artists)
     return artists
@@ -243,7 +246,9 @@ const Home = () => {
       }
     }
     console.log("Sending request to AWS endpoint")
-    request(AUTH_ENDPOINT).then(({ access_token, expires_in }) => {
+    const resp = request(AUTH_ENDPOINT)
+    console.log(resp)
+    resp.then(({ access_token, expires_in }) => {
       const newToken = {
         value: access_token,
         expiration: Date.now() + (expires_in - 20) * 1000,
