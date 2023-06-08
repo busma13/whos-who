@@ -1,6 +1,6 @@
 import styled from "styled-components"
 
-const Button = styled.button`
+const Button = styled.button<{width?:number | string}>`
   color: #fff;
   width: ${({ width }) => width};
   height: 60px;
