@@ -107,7 +107,7 @@ const Home = () => {
 
   const [authLoading, setAuthLoading] = useState(false)
   const [configLoading, setConfigLoading] = useState(false)
-  const [token, setToken] = useState("")
+  const [token, setToken] = useState(null)
 
   // save config to local storage
   useEffect(() => {
@@ -134,7 +134,7 @@ const Home = () => {
     }
     return true
   }
-  const fetchGameData = async (t) => {
+  const fetchGameData = async (t: SpotifyToken) => {
     if (validateConfig()) {
       //Fetch tracks by genre
       let tracksForGuessing = await fetchTracksByGenre(t, numSongs)
@@ -238,10 +238,10 @@ const Home = () => {
     const storedTokenString: string = localStorage.getItem(TOKEN_KEY)
     if (storedTokenString) {
       const storedToken: SpotifyToken = JSON.parse(storedTokenString)
-      if (storedToken.expiration.getTime() > Date.now()) {
+      if (storedToken.expiration > Date.now()) {
         console.log("Token found in localstorage")
         setAuthLoading(false)
-        setToken(storedToken.value)
+        setToken(storedToken)
         loadGenres(storedToken)
         return
       }
@@ -252,11 +252,11 @@ const Home = () => {
     resp.then(({ access_token, expires_in }) => {
       const newToken: SpotifyToken = {
         value: access_token,
-        expiration: new Date(Date.now() + (expires_in - 20) * 1000), //not date type?
+        expiration: Date.now() + (expires_in - 20) * 1000,
       }
       localStorage.setItem(TOKEN_KEY, JSON.stringify(newToken))
       setAuthLoading(false)
-      setToken(newToken.value)
+      setToken(newToken)
       loadGenres(newToken)
     })
   }, [])

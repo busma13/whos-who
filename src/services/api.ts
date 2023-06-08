@@ -46,6 +46,7 @@ export const request = async <T>(url: string, options?: SpotifyOptions): Promise
   // eslint-disable-next-line no-undef
   const response = await fetch(url, options)
   const response_1 = checkStatus(response)
+  console.log(response_1)
   return parseJSON(response_1)
 }
 
@@ -57,7 +58,9 @@ const fetchFromSpotify = <T>({ token, endpoint, params }: SpotifyFetchParamsObje
       .join('&')
     url += `?${paramString}`
   }
-  const options = { headers: { Authorization: `Bearer ${token}` } }
+  console.log(token)
+  const options = { headers: { Authorization: `Bearer ${token.value}` } }
+  console.log(options)
   return request<T>(url, options)
 }
 

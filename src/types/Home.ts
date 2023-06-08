@@ -1,4 +1,4 @@
 export interface SpotifyToken {
   value: string,
-  expiration: Date
+  expiration: number
 }

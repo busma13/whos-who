@@ -43,7 +43,7 @@ export interface SpotifyOptions {
 export interface SpotifyFetchParamsObject {
   token: {
     value: string,
-    expiration: Date
+    expiration: number
   },
   endpoint: string,
   params?: {}
