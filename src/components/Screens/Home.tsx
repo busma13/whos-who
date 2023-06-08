@@ -7,6 +7,7 @@ import Button from "../Button"
 import Background from "../Background"
 import Content from "../Content"
 import { SpotifyToken } from "../../types/Home"
+import { SpotifyAccessTokenResponse, SpotifyArtistsResponse, SpotifyGenresResponse, SpotifyTracksResponse } from "../../types/api"
 
 const AUTH_ENDPOINT =
   "https://nuod0t2zoe.execute-api.us-east-2.amazonaws.com/FT-Classroom/spotify-auth-token"
@@ -117,7 +118,7 @@ const Home = () => {
 
   const loadGenres = async (t: SpotifyToken) => {
     setConfigLoading(true)
-    const response = await fetchFromSpotify({
+    const response = await fetchFromSpotify<SpotifyGenresResponse>({
       token: t,
       endpoint: "recommendations/available-genre-seeds",
     })
@@ -149,7 +150,7 @@ const Home = () => {
   const fetchTracksByGenre = async (t:SpotifyToken, numSongs: number) => {
     //Fetching 50 to allow some randomization of tracks
     const endpoint = `search?q=genre:"${selectedGenre}"&type=track&limit=50`
-    const response = await fetchFromSpotify({
+    const response = await fetchFromSpotify<SpotifyTracksResponse>({
       token: t,
       endpoint: endpoint,
     })
@@ -162,7 +163,7 @@ const Home = () => {
   const fetchRandomArtistsByGenre = async (t: SpotifyToken, numArtists: number) => {
     //Fetching 50 to allow some randomization of tracks
     const endpoint = `search?q=${selectedGenre}&type=artist&limit=50`
-    const response = await fetchFromSpotify({
+    const response = await fetchFromSpotify<SpotifyArtistsResponse>({
       token: t,
       endpoint: endpoint,
     })
@@ -234,29 +235,29 @@ const Home = () => {
   useEffect(() => {
     setAuthLoading(true)
 
-    const storedTokenString = localStorage.getItem(TOKEN_KEY)
+    const storedTokenString: string = localStorage.getItem(TOKEN_KEY)
     if (storedTokenString) {
-      const storedToken = JSON.parse(storedTokenString)
-      if (storedToken.expiration > Date.now()) {
+      const storedToken: SpotifyToken = JSON.parse(storedTokenString)
+      if (storedToken.expiration.getTime() > Date.now()) {
         console.log("Token found in localstorage")
         setAuthLoading(false)
         setToken(storedToken.value)
-        loadGenres(storedToken.value)
+        loadGenres(storedToken)
         return
       }
     }
     console.log("Sending request to AWS endpoint")
-    const resp = request(AUTH_ENDPOINT)
+    const resp = request<SpotifyAccessTokenResponse>(AUTH_ENDPOINT)
     console.log(resp)
     resp.then(({ access_token, expires_in }) => {
-      const newToken = {
+      const newToken: SpotifyToken = {
         value: access_token,
-        expiration: Date.now() + (expires_in - 20) * 1000,
+        expiration: new Date(Date.now() + (expires_in - 20) * 1000), //not date type?
       }
       localStorage.setItem(TOKEN_KEY, JSON.stringify(newToken))
       setAuthLoading(false)
       setToken(newToken.value)
-      loadGenres(newToken.value)
+      loadGenres(newToken)
     })
   }, [])
 

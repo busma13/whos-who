@@ -42,14 +42,14 @@ const checkStatus = (response: Response): Response | undefined => {
  *
  * @return {Promise<any>}           The response data
  */
-export const request = async (url: string, options?: SpotifyOptions): Promise<SpotifyGenresResponse | SpotifyTracksResponse | SpotifyArtistsResponse | SpotifyAccessTokenResponse> => {
+export const request = async <T>(url: string, options?: SpotifyOptions): Promise<T> => {
   // eslint-disable-next-line no-undef
   const response = await fetch(url, options)
   const response_1 = checkStatus(response)
   return parseJSON(response_1)
 }
 
-const fetchFromSpotify = ({ token, endpoint, params }: SpotifyFetchParamsObject) => {
+const fetchFromSpotify = <T>({ token, endpoint, params }: SpotifyFetchParamsObject) => {
   let url = [SPOTIFY_ROOT, endpoint].join('/')
   if (params) {
     const paramString = toPairs(params)
@@ -58,7 +58,7 @@ const fetchFromSpotify = ({ token, endpoint, params }: SpotifyFetchParamsObject)
     url += `?${paramString}`
   }
   const options = { headers: { Authorization: `Bearer ${token}` } }
-  return request(url, options)
+  return request<T>(url, options)
 }
 
 export default fetchFromSpotify

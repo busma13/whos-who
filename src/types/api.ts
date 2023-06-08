@@ -1,6 +1,8 @@
+import { SpotifyToken } from "./Home"
+
 export interface SpotifyAccessTokenResponse {
   access_token: string,
-  token_type: string,
+  token_type: SpotifyToken,
   expires_in: number
 }
 
