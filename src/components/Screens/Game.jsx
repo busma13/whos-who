@@ -39,15 +39,15 @@ const StyledGame = styled.div`
 
 const blink = keyframes`
     0% { background: url(${bluePlay}) center no-repeat }
-    50% { background: url(${pinkPlay}) center no-repeat }
-    100% { background: url(${bluePlay}) center no-repeat }
+    50% { background: url(${pinkPlay}) center no-repeat; transform: translateX(1px) }
+    100% { background: url(${bluePlay}) center no-repeat; transform: translateX(-1px) }
 `
 
 const PlayButton = styled.div`
   min-width: 40px;
   height: 40px;
   text-align: center;
-  animation: ${blink} 0.3s ease-in-out 5 ${({ playState }) => playState};
+  animation: ${blink} 0.9s ease-in-out 2 ${({ playState }) => playState};
   background: url(${({ bg }) => bg}) center no-repeat;
   background-size: contain;
   border-radius: 50%;
@@ -85,6 +85,23 @@ const ArtistContainer = styled.div`
     justify-content: space-evenly;
     margin: 5%;
   }
+`
+
+const InfoContainer = styled.div`
+  display: flex;
+  align-items: center;
+`
+
+const TextContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+`
+
+const AnswerSpan = styled.span`
+  display: inline-block;
+  white-space: pre;
 `
 
 const Artist = styled.div`
@@ -280,16 +297,20 @@ const Game = (props) => {
                 )
               )}
             </ArtistContainer>
-            {!showFinalScore && <span>Current Score: {score}</span>}
+            <InfoContainer>
+              <TextContainer>
+              {!showFinalScore && <span>Current Score: {score}</span>}
 
-            {isCorrect === true && <span>Correct!</span>}
-            {isIncorrect === true && <span>Incorrect!</span>}
-            {isIncorrect === true && (
-              <span>Correct Answer: {guessData[gameRound].artist}</span>
-            )}
-            {showNextAction && (
-              <Button onClick={handleNextRound}>{nextAction}</Button>
-            )}
+              {isCorrect === true && <span>Correct!</span>}
+              {isIncorrect === true && <span>Incorrect!</span>}
+              {isIncorrect === true && (<p style={{ textAlign: 'center', margin: 0 }}>
+                <AnswerSpan>Correct Answer:</AnswerSpan><AnswerSpan> {guessData[gameRound].artist}</AnswerSpan>
+                </p>)}
+              </TextContainer>
+              {showNextAction && (
+                <Button onClick={handleNextRound}>{nextAction}</Button>
+              )}
+            </InfoContainer>
           </>
           {showFinalScore && (
             <FinalScore>
