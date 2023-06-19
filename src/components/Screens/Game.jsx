@@ -122,6 +122,9 @@ const Artist = styled.div`
     min-height: 40px;
     text-align: center;
   }
+  &.selected-choice {
+    border-color: #f00d0d;
+  }
   @media only screen and (max-width: 1000px) {
     height: 170px;
   }
@@ -174,9 +177,8 @@ const Game = (props) => {
     props.location.state.guessDataComplete.length > 1 ? "Next Song" : "Results"
   )
   const [choiceSubmitted, setChoiceSubmitted] = useState(false)
+  const [selectedChoice, setSelectedChoice] = useState(null)
   const [animationKey, setAnimationKey] = useState(Math.random())
-
-  console.log(props)
   const guessData = props.location.state.guessDataComplete
 
   // toggles the song play or pause and the IsPlaying state
@@ -209,6 +211,9 @@ const Game = (props) => {
   const handleNextRound = () => {
     //Reset clicked indices
     // setClickedIndices([])
+    console.log(selectedChoice)
+    selectedChoice.classList.remove('selected-choice')
+    setSelectedChoice(null)
     setChoiceSubmitted(false)
     //Stop playing the song if next button is clicked
     if (currentSong) {
@@ -240,12 +245,11 @@ const Game = (props) => {
     history.push("/")
   }
 
-  const submitArtistChoice = (choice, index) => {
-    // if (!clickedIndices.includes(index)) {
-    //   setClickedIndices([...clickedIndices, index])
-    //   console.log('clickedIndices: ', clickedIndices)
+  const submitArtistChoice = (currentTarget, choice, index) => {
     setChoiceSubmitted(true)
     setShowNextAction(true)
+    console.log(currentTarget)
+    currentTarget.classList.add("selected-choice")
     //check if the choice is correct
     if (choice.name === guessData[gameRound].artist) {
       setIsCorrect(true)
@@ -289,7 +293,10 @@ const Game = (props) => {
                 ) : (
                   <Artist
                     key={index}
-                    onClick={() => submitArtistChoice(choice, index)}
+                    onClick={(e) => {
+                      setSelectedChoice(e.currentTarget)
+                      submitArtistChoice(e.currentTarget, choice, index)
+                    }}
                   >
                     <ImgContainer image={choice.imgUrl} />
                     <span>{choice.name}</span>
@@ -299,13 +306,16 @@ const Game = (props) => {
             </ArtistContainer>
             <InfoContainer>
               <TextContainer>
-              {!showFinalScore && <span>Current Score: {score}</span>}
+                {!showFinalScore && <span>Current Score: {score}</span>}
 
-              {isCorrect === true && <span>Correct!</span>}
-              {isIncorrect === true && <span>Incorrect!</span>}
-              {isIncorrect === true && (<p style={{ textAlign: 'center', margin: 0 }}>
-                <AnswerSpan>Correct Answer:</AnswerSpan><AnswerSpan> {guessData[gameRound].artist}</AnswerSpan>
-                </p>)}
+                {isCorrect === true && <span>Correct!</span>}
+                {isIncorrect === true && <span>Incorrect!</span>}
+                {isIncorrect === true && (
+                  <p style={{ textAlign: "center", margin: 0 }}>
+                    <AnswerSpan>Correct Answer:</AnswerSpan>
+                    <AnswerSpan> {guessData[gameRound].artist}</AnswerSpan>
+                  </p>
+                )}
               </TextContainer>
               {showNextAction && (
                 <Button onClick={handleNextRound}>{nextAction}</Button>
