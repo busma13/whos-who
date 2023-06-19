@@ -6,8 +6,13 @@ import { useHistory } from "react-router-dom"
 import Button from "../Button"
 import Background from "../Background"
 import Content from "../Content"
-import { SpotifyToken } from "../../types/Home"
-import { SpotifyAccessTokenResponse, SpotifyArtistsResponse, SpotifyGenresResponse, SpotifyTracksResponse } from "../../types/api"
+import { SpotifyToken, Track, Artist, ArtistGuessData } from "../../types/Home"
+import {
+  SpotifyAccessTokenResponse,
+  SpotifyArtistsResponse,
+  SpotifyGenresResponse,
+  SpotifyTracksResponse,
+} from "../../types/api"
 
 const AUTH_ENDPOINT =
   "https://nuod0t2zoe.execute-api.us-east-2.amazonaws.com/FT-Classroom/spotify-auth-token"
@@ -46,7 +51,7 @@ const GameConfig = styled.div`
   }
 `
 
-const GameConfigItem = styled.div<{jc?:string}>`
+const GameConfigItem = styled.div<{ jc?: string }>`
   width: 100%;
   display: flex;
   flex-direction: row;
@@ -62,10 +67,6 @@ const GameConfigItem = styled.div<{jc?:string}>`
     }
   }
 `
-
-// GameConfigItem.defaultProps = {
-//   jc: "space-between",
-// }
 
 const Select = styled.select`
   border-radius: 7px;
@@ -137,17 +138,26 @@ const Home = () => {
   const fetchGameData = async (t: SpotifyToken) => {
     if (validateConfig()) {
       //Fetch tracks by genre
-      let tracksForGuessing = await fetchTracksByGenre(t, numSongs)
+      let chunkOfTracks: Track[] = await fetchTracksByGenre(t)
+
+      //Select tracks to guess
+      let tracksForGuessing = chunkOfTracks.splice(0, numSongs)
+      console.log(tracksForGuessing)
 
       //fetch artists by genre
-      let artistsForGuessing = await fetchRandomArtistsByGenre(t, numArtists)
+      let artistsForGuessing: ArtistGuessData[] = chunkOfTracks
+      .map((track) => ({
+        artist: track.artists[0],
+        image: track.album.images[0],
+      }))
+      console.log(artistsForGuessing)
 
       //using the tracks and artists build the guessing game data
       buildGuessData(tracksForGuessing, artistsForGuessing)
     }
   }
 
-  const fetchTracksByGenre = async (t:SpotifyToken, numSongs: number) => {
+  const fetchTracksByGenre = async (t: SpotifyToken) => {
     //Fetching 50 to allow some randomization of tracks
     const endpoint = `search?q=genre:"${selectedGenre}"&type=track&limit=50`
     const response = await fetchFromSpotify<SpotifyTracksResponse>({
@@ -155,33 +165,45 @@ const Home = () => {
       endpoint: endpoint,
     })
     console.log(response)
-    const tracks = response.tracks.items
-    const randomizedTracks = tracks.sort(() => 0.5 - Math.random())
-    return randomizedTracks.slice(0, numSongs)
-  }
-
-  const fetchRandomArtistsByGenre = async (t: SpotifyToken, numArtists: number) => {
-    //Fetching 50 to allow some randomization of tracks
-    const endpoint = `search?q=${selectedGenre}&type=artist&limit=50`
-    const response = await fetchFromSpotify<SpotifyArtistsResponse>({
-      token: t,
-      endpoint: endpoint,
+    const tracks: Track[] = response.tracks.items
+    const seenArtists = new Set()
+    const popularTracksNoDuplicateArtists = tracks.filter((track) => {
+      if (track.popularity < 80) {
+        return false
+      }
+      const duplicate = seenArtists.has(track.artists[0].name)
+      seenArtists.add(track.artists[0].name)
+      return !duplicate
     })
-    console.log(response)
-    const artists = response.artists.items
-    console.log(artists)
-    return artists
+    console.log("Pop tracks: ", popularTracksNoDuplicateArtists)
+    const randomizedTracks = popularTracksNoDuplicateArtists.sort(
+      () => 0.5 - Math.random()
+    )
+    return randomizedTracks
   }
 
-  const buildGuessData = async (tracksForGuessing, artistsForGuessing) => {
-    let artistChoicesArr = artistsForGuessing.map((artist) => {
+  // const fetchRandomArtistsByGenre = async (t: SpotifyToken, numArtists: number) => {
+  //   //Fetching 50 to allow some randomization of tracks
+  //   const endpoint = `search?q=${selectedGenre}&type=artist&limit=50`
+  //   const response = await fetchFromSpotify<SpotifyArtistsResponse>({
+  //     token: t,
+  //     endpoint: endpoint,
+  //   })
+  //   console.log(response)
+  //   const artists = response.artists.items
+  //   console.log(artists)
+  //   return artists
+  // }
+
+  const buildGuessData = async (tracksForGuessing: Track[], artistsForGuessing: ArtistGuessData[]) => {
+    let artistChoicesArr = artistsForGuessing.map((artistGuessData) => {
       let imgUrl =
-        artist.images.length > 0
-          ? artist.images[0].url
+        artistGuessData.image 
+          ? artistGuessData.image.url
           : "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg"
       return {
-        key: artist.name,
-        name: artist.name,
+        key: artistGuessData.artist.name,
+        name: artistGuessData.artist.name,
         imgUrl: imgUrl,
       }
     }) // create an array of artist names from artistsForGuessing
@@ -282,7 +304,7 @@ const Home = () => {
                 value={selectedGenre}
                 onChange={(event) => setSelectedGenre(event.target.value)}
               >
-                <option value="">Select Genre</option>
+                <option value=''>Select Genre</option>
                 {genres.map((genre) => (
                   <option key={genre} value={genre}>
                     {genre}
@@ -293,10 +315,10 @@ const Home = () => {
             <GameConfigItem>
               # of Songs in Game
               <Input
-                type="number"
-                min="1"
-                max="3"
-                inputMode="numeric"
+                type='number'
+                min='1'
+                max='3'
+                inputMode='numeric'
                 value={numSongs}
                 onChange={(event) => {
                   const inputVal = event.target.value
@@ -311,10 +333,10 @@ const Home = () => {
             <GameConfigItem>
               # of Artists in Choice
               <Input
-                type="number"
-                min="2"
-                max="4"
-                inputMode="numeric"
+                type='number'
+                min='2'
+                max='4'
+                inputMode='numeric'
                 value={numArtists}
                 onChange={(event) => {
                   const inputVal = event.target.value
@@ -330,7 +352,7 @@ const Home = () => {
               {/* <Link to="/Game"> */}
               <Button
                 width={"80%"}
-                value="Start"
+                value='Start'
                 onClick={() => {
                   console.log("Button clicked")
                   console.log("Genre: " + selectedGenre)
