@@ -124,7 +124,7 @@ const Home = () => {
       endpoint: "recommendations/available-genre-seeds",
     })
     console.log(response)
-    setGenres(response.genres)
+    setGenres(response.genres.filter((genre) => genre !== 'bossanova'))
     setConfigLoading(false)
   }
 
@@ -145,11 +145,12 @@ const Home = () => {
       console.log(tracksForGuessing)
 
       //fetch artists by genre
-      let artistsForGuessing: ArtistGuessData[] = chunkOfTracks
-      .map((track) => ({
-        artist: track.artists[0],
-        image: track.album.images[0],
-      }))
+      let artistsForGuessing: ArtistGuessData[] = chunkOfTracks.map(
+        (track) => ({
+          artist: track.artists[0],
+          image: track.album.images[0],
+        })
+      )
       console.log(artistsForGuessing)
 
       //using the tracks and artists build the guessing game data
@@ -159,16 +160,20 @@ const Home = () => {
 
   const fetchTracksByGenre = async (t: SpotifyToken) => {
     //Fetching 50 to allow some randomization of tracks
-    const endpoint = `search?q=genre:"${selectedGenre}"&type=track&limit=50`
+    const offset = Math.floor(Math.random() * 200)
+    const endpoint = `search?q=genre:"${selectedGenre}"&type=track&market=US&limit=50&offset=${offset}`
     const response = await fetchFromSpotify<SpotifyTracksResponse>({
       token: t,
       endpoint: endpoint,
     })
+
+    //TODO: check that we have enough tracks. If not get more
+
     console.log(response)
     const tracks: Track[] = response.tracks.items
     const seenArtists = new Set()
-    const popularTracksNoDuplicateArtists = tracks.filter((track) => {
-      if (track.popularity < 80) {
+    const popularTracksNoDuplicateArtists = tracks.slice().filter((track) => {
+      if (track.popularity < 50 || track.preview_url === null) {
         return false
       }
       const duplicate = seenArtists.has(track.artists[0].name)
@@ -176,9 +181,18 @@ const Home = () => {
       return !duplicate
     })
     console.log("Pop tracks: ", popularTracksNoDuplicateArtists)
-    const randomizedTracks = popularTracksNoDuplicateArtists.sort(
-      () => 0.5 - Math.random()
-    )
+    
+    let randomizedTracks: Track[]
+    if (popularTracksNoDuplicateArtists.length > 11) {
+      randomizedTracks = popularTracksNoDuplicateArtists.sort(
+        () => 0.5 - Math.random()
+      )
+    } else {
+      randomizedTracks = tracks.sort(
+        () => 0.5 - Math.random()
+      )
+    }
+    console.log("Randomized tracks: ", randomizedTracks)
     return randomizedTracks
   }
 
@@ -195,12 +209,14 @@ const Home = () => {
   //   return artists
   // }
 
-  const buildGuessData = async (tracksForGuessing: Track[], artistsForGuessing: ArtistGuessData[]) => {
+  const buildGuessData = async (
+    tracksForGuessing: Track[],
+    artistsForGuessing: ArtistGuessData[]
+  ) => {
     let artistChoicesArr = artistsForGuessing.map((artistGuessData) => {
-      let imgUrl =
-        artistGuessData.image 
-          ? artistGuessData.image.url
-          : "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg"
+      let imgUrl = artistGuessData.image
+        ? artistGuessData.image.url
+        : "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg"
       return {
         key: artistGuessData.artist.name,
         name: artistGuessData.artist.name,
