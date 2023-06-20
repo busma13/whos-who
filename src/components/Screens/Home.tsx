@@ -124,7 +124,8 @@ const Home = () => {
       endpoint: "recommendations/available-genre-seeds",
     })
     console.log(response)
-    setGenres(response.genres.filter((genre) => genre !== 'bossanova'))
+    const emptyGenres = ['bossanova', 'disney', 'holidays']
+    setGenres(response.genres.filter((genre) => !emptyGenres.includes(genre)))
     setConfigLoading(false)
   }
 
@@ -139,7 +140,11 @@ const Home = () => {
     if (validateConfig()) {
       //Fetch tracks by genre
       let chunkOfTracks: Track[] = await fetchTracksByGenre(t)
-
+      let fetchTracksAttemptsCounter = 0
+      while (chunkOfTracks.length < numSongs * numArtists && fetchTracksAttemptsCounter < 3) {
+        chunkOfTracks = await fetchTracksByGenre(t)
+        fetchTracksAttemptsCounter++
+      }
       //Select tracks to guess
       let tracksForGuessing = chunkOfTracks.splice(0, numSongs)
       console.log(tracksForGuessing)
@@ -160,6 +165,7 @@ const Home = () => {
 
   const fetchTracksByGenre = async (t: SpotifyToken) => {
     //Fetching 50 to allow some randomization of tracks
+    let randomizedTracks: Track[] = []
     const offset = Math.floor(Math.random() * 200)
     const endpoint = `search?q=genre:"${selectedGenre}"&type=track&market=US&limit=50&offset=${offset}`
     const response = await fetchFromSpotify<SpotifyTracksResponse>({
@@ -167,47 +173,34 @@ const Home = () => {
       endpoint: endpoint,
     })
 
-    //TODO: check that we have enough tracks. If not get more
-
     console.log(response)
     const tracks: Track[] = response.tracks.items
     const seenArtists = new Set()
-    const popularTracksNoDuplicateArtists = tracks.slice().filter((track) => {
-      if (track.popularity < 50 || track.preview_url === null) {
+    const tracksWithPreviewAndNoDuplicateArtists = tracks.slice().filter((track) => {
+      if (track.preview_url === null) {
         return false
       }
       const duplicate = seenArtists.has(track.artists[0].name)
       seenArtists.add(track.artists[0].name)
       return !duplicate
     })
-    console.log("Pop tracks: ", popularTracksNoDuplicateArtists)
-    
-    let randomizedTracks: Track[]
-    if (popularTracksNoDuplicateArtists.length > 11) {
-      randomizedTracks = popularTracksNoDuplicateArtists.sort(
+    console.log("valid tracks: ", tracksWithPreviewAndNoDuplicateArtists)
+
+    const popularTracks = tracksWithPreviewAndNoDuplicateArtists.slice().filter(track => track.popularity >= 50)
+    console.log("popular tracks: ", popularTracks)
+
+    if (popularTracks.length >= numArtists * numSongs) {
+      randomizedTracks = popularTracks.sort(
         () => 0.5 - Math.random()
       )
-    } else {
-      randomizedTracks = tracks.sort(
+    } else if (tracksWithPreviewAndNoDuplicateArtists.length >= numArtists * numSongs) {
+      randomizedTracks = tracksWithPreviewAndNoDuplicateArtists.sort(
         () => 0.5 - Math.random()
       )
     }
     console.log("Randomized tracks: ", randomizedTracks)
     return randomizedTracks
   }
-
-  // const fetchRandomArtistsByGenre = async (t: SpotifyToken, numArtists: number) => {
-  //   //Fetching 50 to allow some randomization of tracks
-  //   const endpoint = `search?q=${selectedGenre}&type=artist&limit=50`
-  //   const response = await fetchFromSpotify<SpotifyArtistsResponse>({
-  //     token: t,
-  //     endpoint: endpoint,
-  //   })
-  //   console.log(response)
-  //   const artists = response.artists.items
-  //   console.log(artists)
-  //   return artists
-  // }
 
   const buildGuessData = async (
     tracksForGuessing: Track[],
