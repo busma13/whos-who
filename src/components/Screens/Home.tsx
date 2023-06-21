@@ -124,7 +124,7 @@ const Home = () => {
       endpoint: "recommendations/available-genre-seeds",
     })
     console.log(response)
-    const emptyGenres = ['bossanova', 'disney', 'holidays']
+    const emptyGenres = ['bossanova', 'disney', 'holidays', 'metal-misc', 'movies', 'mpb', 'new-release', 'philippines-opm', 'post-dubstep', 'rainy-day', 'road-trip', 'rockabilly', 'soundtracks', 'summer', 'work-out', 'world-music']
     setGenres(response.genres.filter((genre) => !emptyGenres.includes(genre)))
     setConfigLoading(false)
   }
