@@ -1,3 +1,10 @@
+Who's Who is a guessing game where the user matches a song to the artist who performed it. Some of the technologies used are React, JSX, Styled-Components, Spotify API, and Howler.js.  
+
+This project was built by [Shilpa Nair](https://github.com/https://github.com/lafleurss), and [Peter Luitjens](https://github.com/busma13) as part of the [FastTrack](https://www.allaboutfasttrack.com/) full-stack software development training program by [Cook Systems](https://cooksys.com/).
+
+---
+The following are the assessment instructions:
+
 Assessment 2
 ===============================
 # Overview
