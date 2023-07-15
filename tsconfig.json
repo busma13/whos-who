@@ -33,6 +33,9 @@
     // where you want the output files to be generated.
     // If omitted it generates next to the files
     "outDir": "./dist/",
+    // When true, null and undefined have their own distinct types.
+    // You’ll get a type error if you try to use them where a concrete value is expected.
+    "strictNullChecks": true,
     // Generate source map file to debug ts file.
     "sourceMap": true,
     // What flavor of Javascript you want to transpile to
