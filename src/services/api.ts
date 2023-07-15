@@ -1,8 +1,15 @@
-import { SpotifyGenresResponse, SpotifyOptions, SpotifyFetchParamsObject, SpotifyTracksResponse, SpotifyArtistsResponse, SpotifyAccessTokenResponse } from '../types/api'
-import toPairs from 'lodash/toPairs'
-import 'whatwg-fetch'
+import {
+  SpotifyGenresResponse,
+  SpotifyOptions,
+  SpotifyFetchParamsObject,
+  SpotifyTracksResponse,
+  SpotifyArtistsResponse,
+  SpotifyAccessTokenResponse,
+} from "../types/api"
+import toPairs from "lodash/toPairs"
+import "whatwg-fetch"
 
-const SPOTIFY_ROOT = 'https://api.spotify.com/v1'
+const SPOTIFY_ROOT = "https://api.spotify.com/v1"
 
 /**
  * Parses the JSON returned by a network request
@@ -11,7 +18,7 @@ const SPOTIFY_ROOT = 'https://api.spotify.com/v1'
  *
  * @return {Prominse<SpotifyGenresResponse>} The parsed JSON from the request
  */
-const parseJSON = (response: Response): Promise<any> => {
+const parseJSON = <T>(response: Response): Promise<T> | null => {
   if (response.status === 204 || response.status === 205) {
     return null
   }
@@ -23,14 +30,14 @@ const parseJSON = (response: Response): Promise<any> => {
  *
  * @param  {Response} response   A response from a network request
  *
- * @return {Response|undefined} Returns either the response, or throws an error
+ * @return {Response} Returns either the response, or throws an error
  */
 
-const checkStatus = (response: Response): Response | undefined => {
+const checkStatus = (response: Response): Response => {
   if (response.status >= 200 && response.status < 300) {
     return response
   }
-  const error = new Error(response.statusText, { cause: response})
+  const error = new Error(response.statusText, { cause: response })
   throw error
 }
 
@@ -42,20 +49,27 @@ const checkStatus = (response: Response): Response | undefined => {
  *
  * @return {Promise<any>}           The response data
  */
-export const request = async <T>(url: string, options?: SpotifyOptions): Promise<T> => {
+export const request = async <T>(
+  url: string,
+  options?: SpotifyOptions
+): Promise<T | null> => {
   // eslint-disable-next-line no-undef
   const response = await fetch(url, options)
   const response_1 = checkStatus(response)
   console.log(response_1)
-  return parseJSON(response_1)
+  return parseJSON<T>(response_1)
 }
 
-const fetchFromSpotify = <T>({ token, endpoint, params }: SpotifyFetchParamsObject) => {
-  let url = [SPOTIFY_ROOT, endpoint].join('/')
+const fetchFromSpotify = <T>({
+  token,
+  endpoint,
+  params,
+}: SpotifyFetchParamsObject) => {
+  let url = [SPOTIFY_ROOT, endpoint].join("/")
   if (params) {
     const paramString = toPairs(params)
-      .map(param => param.join('='))
-      .join('&')
+      .map((param) => param.join("="))
+      .join("&")
     url += `?${paramString}`
   }
   console.log(token)
