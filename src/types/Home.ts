@@ -1,5 +1,5 @@
 export interface SpotifyToken {
-  value: string,
+  value: string
   expiration: number
 }
 
@@ -8,20 +8,20 @@ export interface Artist {
 }
 
 export interface Track {
-  name: string,
-  album: {images: Image[]},
-  artists: [Artist],
-  popularity: number,
+  name: string
+  album: { images: Image[] }
+  artists: [Artist]
+  popularity: number
   preview_url: string
 }
 
 export interface Image {
-    height: number,
-    url: string,
-    width: number
+  height: number
+  url: string
+  width: number
 }
 
 export interface ArtistGuessData {
-  artist: Artist;
+  artist: Artist
   image: Image
-}[]
+}

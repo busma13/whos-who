@@ -1,22 +1,21 @@
-import React, { useEffect, useState } from "react"
-import fetchFromSpotify, { request } from "../../services/api"
-import styled from "styled-components"
-import { useHistory } from "react-router-dom"
+import React, { useEffect, useState } from 'react'
+import fetchFromSpotify, { request } from '../../services/api'
+import styled from 'styled-components'
+import { useHistory } from 'react-router-dom'
 
-import Button from "../Button"
-import Background from "../Background"
-import Content from "../Content"
-import { SpotifyToken, Track, Artist, ArtistGuessData } from "../../types/Home"
+import Button from '../Button'
+import Background from '../Background'
+import Content from '../Content'
+import { SpotifyToken, Track, ArtistGuessData } from '../../types/Home'
 import {
   SpotifyAccessTokenResponse,
-  SpotifyArtistsResponse,
   SpotifyGenresResponse,
   SpotifyTracksResponse,
-} from "../../types/api"
+} from '../../types/api'
 
 const AUTH_ENDPOINT =
-  "https://nuod0t2zoe.execute-api.us-east-2.amazonaws.com/FT-Classroom/spotify-auth-token"
-const TOKEN_KEY = "whos-who-access-token"
+  'https://nuod0t2zoe.execute-api.us-east-2.amazonaws.com/FT-Classroom/spotify-auth-token'
+const TOKEN_KEY = 'whos-who-access-token'
 
 const HomeContainer = styled.div`
   font-size: 2rem;
@@ -55,7 +54,7 @@ const GameConfigItem = styled.div<{ jc?: string }>`
   width: 100%;
   display: flex;
   flex-direction: row;
-  justify-content: ${({ jc = "space-between" }) => jc};
+  justify-content: ${({ jc = 'space-between' }) => jc};
   padding: 10px 10px 10px 10px;
   @media only screen and (max-width: 520px) {
     flex-direction: column;
@@ -89,20 +88,15 @@ const Home = () => {
 
   const [genres, setGenres] = useState([])
   const [selectedGenre, setSelectedGenre] = useState(() => {
-    //function to get state from local storage if available
-    const localGenre = JSON.parse(localStorage.getItem("SELECTED_GENRE"))
-    return localGenre || ""
+    const localGenre = JSON.parse(localStorage.getItem('SELECTED_GENRE'))
+    return localGenre || ''
   })
-  //Added two states to capture number of Songs and Artists config
-  const [numSongs, setNumSongs] = useState(() => {
-    //function to get state from local storage if available
-
-    const localNumSongs = JSON.parse(localStorage.getItem("NUM_SONGS"))
+  const [numSongs, setNumSongs] = useState<number>(() => {
+    const localNumSongs = JSON.parse(localStorage.getItem('NUM_SONGS'))
     return localNumSongs || 1
   })
-  const [numArtists, setNumArtists] = useState(() => {
-    //function to get state from local storage if available
-    const localNumArtists = JSON.parse(localStorage.getItem("NUM_ARTISTS"))
+  const [numArtists, setNumArtists] = useState<number>(() => {
+    const localNumArtists = JSON.parse(localStorage.getItem('NUM_ARTISTS'))
     return localNumArtists || 2
   })
 
@@ -112,26 +106,43 @@ const Home = () => {
 
   // save config to local storage
   useEffect(() => {
-    localStorage.setItem("SELECTED_GENRE", JSON.stringify(selectedGenre))
-    localStorage.setItem("NUM_SONGS", JSON.stringify(numSongs))
-    localStorage.setItem("NUM_ARTISTS", JSON.stringify(numArtists))
+    localStorage.setItem('SELECTED_GENRE', JSON.stringify(selectedGenre))
+    localStorage.setItem('NUM_SONGS', JSON.stringify(numSongs))
+    localStorage.setItem('NUM_ARTISTS', JSON.stringify(numArtists))
   }, [selectedGenre, numArtists, numSongs])
 
   const loadGenres = async (t: SpotifyToken) => {
     setConfigLoading(true)
     const response = await fetchFromSpotify<SpotifyGenresResponse>({
       token: t,
-      endpoint: "recommendations/available-genre-seeds",
+      endpoint: 'recommendations/available-genre-seeds',
     })
     console.log(response)
-    const emptyGenres = ['bossanova', 'disney', 'holidays', 'metal-misc', 'movies', 'mpb', 'new-release', 'philippines-opm', 'post-dubstep', 'rainy-day', 'road-trip', 'rockabilly', 'soundtracks', 'summer', 'work-out', 'world-music']
+    const emptyGenres = [
+      'bossanova',
+      'disney',
+      'holidays',
+      'metal-misc',
+      'movies',
+      'mpb',
+      'new-release',
+      'philippines-opm',
+      'post-dubstep',
+      'rainy-day',
+      'road-trip',
+      'rockabilly',
+      'soundtracks',
+      'summer',
+      'work-out',
+      'world-music',
+    ]
     setGenres(response.genres.filter((genre) => !emptyGenres.includes(genre)))
     setConfigLoading(false)
   }
 
   const validateConfig = () => {
     if (!selectedGenre) {
-      alert("Choose a genre!")
+      alert('Choose a genre!')
       return false
     }
     return true
@@ -141,7 +152,10 @@ const Home = () => {
       //Fetch tracks by genre
       let chunkOfTracks: Track[] = await fetchTracksByGenre(t)
       let fetchTracksAttemptsCounter = 0
-      while (chunkOfTracks.length < numSongs * numArtists && fetchTracksAttemptsCounter < 3) {
+      while (
+        chunkOfTracks.length < numSongs * numArtists &&
+        fetchTracksAttemptsCounter < 3
+      ) {
         chunkOfTracks = await fetchTracksByGenre(t)
         fetchTracksAttemptsCounter++
       }
@@ -175,30 +189,35 @@ const Home = () => {
 
     console.log(response)
     const tracks: Track[] = response.tracks.items
-    const seenArtists = new Set()
-    const tracksWithPreviewAndNoDuplicateArtists = tracks.slice().filter((track) => {
-      if (track.preview_url === null) {
-        return false
-      }
-      const duplicate = seenArtists.has(track.artists[0].name)
-      seenArtists.add(track.artists[0].name)
-      return !duplicate
-    })
-    console.log("valid tracks: ", tracksWithPreviewAndNoDuplicateArtists)
+    const seenArtists = new Set<string>()
+    const tracksWithPreviewAndNoDuplicateArtists = tracks
+      .slice()
+      .filter((track) => {
+        if (track.preview_url === null) {
+          return false
+        }
+        const duplicate: boolean = seenArtists.has(track.artists[0].name)
+        seenArtists.add(track.artists[0].name)
+        return !duplicate
+      })
+    console.log('valid tracks: ', tracksWithPreviewAndNoDuplicateArtists)
 
-    const popularTracks = tracksWithPreviewAndNoDuplicateArtists.slice().filter(track => track.popularity >= 50)
-    console.log("popular tracks: ", popularTracks)
+    const popularTracks = tracksWithPreviewAndNoDuplicateArtists
+      .slice()
+      .filter((track) => track.popularity >= 50)
+    console.log('popular tracks: ', popularTracks)
 
     if (popularTracks.length >= numArtists * numSongs) {
-      randomizedTracks = popularTracks.sort(
-        () => 0.5 - Math.random()
-      )
-    } else if (tracksWithPreviewAndNoDuplicateArtists.length >= numArtists * numSongs) {
+      randomizedTracks = popularTracks.sort(() => 0.5 - Math.random())
+    } else if (
+      tracksWithPreviewAndNoDuplicateArtists.length >=
+      numArtists * numSongs
+    ) {
       randomizedTracks = tracksWithPreviewAndNoDuplicateArtists.sort(
         () => 0.5 - Math.random()
       )
     }
-    console.log("Randomized tracks: ", randomizedTracks)
+    console.log('Randomized tracks: ', randomizedTracks)
     return randomizedTracks
   }
 
@@ -207,9 +226,9 @@ const Home = () => {
     artistsForGuessing: ArtistGuessData[]
   ) => {
     let artistChoicesArr = artistsForGuessing.map((artistGuessData) => {
-      let imgUrl = artistGuessData.image
+      let imgUrl: string = artistGuessData.image
         ? artistGuessData.image.url
-        : "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg"
+        : 'https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg'
       return {
         key: artistGuessData.artist.name,
         name: artistGuessData.artist.name,
@@ -235,7 +254,7 @@ const Home = () => {
         name: guessData.artists[0].name,
         imgUrl: guessData.album.images[0].url,
       })
-      console.log("pickedArtistChoices")
+      console.log('pickedArtistChoices')
       console.log(pickedArtistChoices)
       const shuffledPickedArtistChoices = pickedArtistChoices.sort(
         () => 0.5 - Math.random()
@@ -258,8 +277,8 @@ const Home = () => {
   //Pass control to Game component only after guessDataComplete is populated
   useEffect(() => {
     if (guessDataComplete.length > 0) {
-      console.log("Guess Data Complete: " + guessDataComplete)
-      history.push("/Game", { guessDataComplete })
+      console.log('Guess Data Complete: ' + guessDataComplete)
+      history.push('/Game', { guessDataComplete })
     }
   }, [guessDataComplete, history])
 
@@ -270,14 +289,14 @@ const Home = () => {
     if (storedTokenString) {
       const storedToken: SpotifyToken = JSON.parse(storedTokenString)
       if (storedToken.expiration > Date.now()) {
-        console.log("Token found in localstorage")
+        console.log('Token found in localstorage')
         setAuthLoading(false)
         setToken(storedToken)
         loadGenres(storedToken)
         return
       }
     }
-    console.log("Sending request to AWS endpoint")
+    console.log('Sending request to AWS endpoint')
     const resp = request<SpotifyAccessTokenResponse>(AUTH_ENDPOINT)
     console.log(resp)
     resp.then(({ access_token, expires_in }) => {
@@ -330,12 +349,11 @@ const Home = () => {
                 inputMode='numeric'
                 value={numSongs}
                 onChange={(event) => {
-                  const inputVal = event.target.value
                   // Use regular expression to remove any non-numeric characters
-                  const numericVal = event.target.value
-                    .replace(/[^1-3]?/, "")
+                  const inputVal = event.target.value
+                    .replace(/[^1-3]?/, '')
                     .substr(0, 1)
-                  setNumSongs(numericVal)
+                  setNumSongs(Number(inputVal))
                 }}
               />
             </GameConfigItem>
@@ -348,29 +366,26 @@ const Home = () => {
                 inputMode='numeric'
                 value={numArtists}
                 onChange={(event) => {
-                  const inputVal = event.target.value
                   // Use regular expression to remove any non-numeric characters
-                  const numericVal = event.target.value
-                    .replace(/[^2-4]/g, "")
+                  const inputVal = event.target.value
+                    .replace(/[^2-4]/g, '')
                     .substr(0, 1)
-                  setNumArtists(numericVal)
+                  setNumArtists(Number(inputVal))
                 }}
               />
             </GameConfigItem>
-            <GameConfigItem jc={"center"}>
+            <GameConfigItem jc={'center'}>
               {/* <Link to="/Game"> */}
               <Button
-                width={"80%"}
+                width={'80%'}
                 value='Start'
                 onClick={() => {
-                  console.log("Button clicked")
-                  console.log("Genre: " + selectedGenre)
-                  console.log("Num Songs: " + numSongs)
-                  console.log("Num Artists: " + numArtists)
+                  console.log('Button clicked')
+                  console.log('Genre: ' + selectedGenre)
+                  console.log('Num Songs: ' + numSongs)
+                  console.log('Num Artists: ' + numArtists)
 
                   fetchGameData(token)
-                  //Fetch x songs based on genre
-                  //For each song build array of artists - 1 correct + n-1 random
                 }}
               >
                 Start
